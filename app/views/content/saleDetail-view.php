@@ -11,11 +11,17 @@
 		$code=$insLogin->limpiarCadena($url[1]);
 
 		$datos=$insLogin->seleccionarDatos("Normal","venta INNER JOIN cliente ON venta.cliente_id=cliente.cliente_id INNER JOIN usuario ON venta.usuario_id=usuario.usuario_id INNER JOIN caja ON venta.caja_id=caja.caja_id WHERE (venta_codigo='".$code."')","*",0);
-
+		
 		if($datos->rowCount()==1){
 			$datos_venta=$datos->fetch();
+
+		if($datos_venta['anulado'] == 1){
+			$anulado = " - ANULADA";
+		}else{
+			$anulado = "";
+		}
 	?>
-	<h2 class="title has-text-centered">Reporte de la venta <?php echo " (".$code.")"; ?></h2>
+	<h2 class="title has-text-centered">Reporte de la venta <?php echo " (".$code.")".$anulado; ?></h2>
 	<div class="columns pb-6 pt-6">
 		<div class="column">
 
@@ -59,17 +65,17 @@
 
 			<div class="full-width sale-details text-condensedLight">
 				<div class="has-text-weight-bold">Total</div>
-				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.MONEDA_NOMBRE; ?></span>
+				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.$datos_venta['venta_forma_pago']; ?></span>
 			</div>
 
 			<div class="full-width sale-details text-condensedLight">
 				<div class="has-text-weight-bold">Pagado</div>
-				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_pagado'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.MONEDA_NOMBRE; ?></span>
+				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_pagado'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.$datos_venta['venta_forma_pago']; ?></span>
 			</div>
 
 			<div class="full-width sale-details text-condensedLight">
 				<div class="has-text-weight-bold">Cambio</div>
-				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_cambio'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.MONEDA_NOMBRE; ?></span>
+				<span class="has-text-link"><?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_cambio'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.$datos_venta['venta_forma_pago']; ?></span>
 			</div>
 
 		</div>
@@ -104,20 +110,38 @@
                             <td><?php echo $cc; ?></td>
                             <td><?php echo $detalle['venta_detalle_descripcion']; ?></td>
                             <td><?php echo $detalle['venta_detalle_cantidad']; ?></td>
-                            <td><?php echo MONEDA_SIMBOLO.number_format($detalle['venta_detalle_precio_venta'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".MONEDA_NOMBRE; ?></td>
-                            <td><?php echo MONEDA_SIMBOLO.number_format($detalle['venta_detalle_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".MONEDA_NOMBRE; ?></td>
+                            <td><?php echo MONEDA_SIMBOLO.number_format($detalle['venta_detalle_precio_venta'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$datos_venta['venta_forma_pago']; ?></td>
+                            <td><?php echo MONEDA_SIMBOLO.number_format($detalle['venta_detalle_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$datos_venta['venta_forma_pago']; ?></td>
                         </tr>
                         <?php
                                 $cc++;
                             }
                         ?>
+						<tr class="has-text-centered" >
+                            <td colspan="3"></td>
+                            <td class="has-text-weight-bold">
+                                SUB TOTAL
+                            </td>
+                            <td class="has-text-weight-bold">
+                                <?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_subtotal'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$datos_venta['venta_forma_pago']; ?>
+                            </td>
+                        </tr>
+						<tr class="has-text-centered" >
+                            <td colspan="3"></td>
+                            <td class="has-text-weight-bold">
+                                IVA
+                            </td>
+                            <td class="has-text-weight-bold">
+                                <?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_iva'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$datos_venta['venta_forma_pago']; ?>
+                            </td>
+                        </tr>
                         <tr class="has-text-centered" >
                             <td colspan="3"></td>
                             <td class="has-text-weight-bold">
                                 TOTAL
                             </td>
                             <td class="has-text-weight-bold">
-                                <?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".MONEDA_NOMBRE; ?>
+                                <?php echo MONEDA_SIMBOLO.number_format($datos_venta['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$datos_venta['venta_forma_pago']; ?>
                             </td>
                         </tr>
                         <?php
@@ -142,7 +166,10 @@
 			<i class="fas fa-file-invoice-dollar fa-fw"></i> &nbsp; Imprimir factura
 			</button> &nbsp;&nbsp; 
 
-			<button type="button" class="button is-link is-light is-medium" onclick="print_ticket(\''.APP_URL.'app/pdf/ticket.php?code='.$datos_venta['venta_codigo'].'\')" title="Imprimir ticket Nro. '.$datos_venta['venta_id'].'" ><i class="fas fa-receipt fa-fw"></i> &nbsp; Imprimir ticket</button>';
+			<button type="button" class="button is-link is-light is-medium" onclick="print_ticket(\''.APP_URL.'app/pdf/ticket.php?code='.$datos_venta['venta_codigo'].'\')" title="Imprimir ticket Nro. '.$datos_venta['venta_id'].'" ><i class="fas fa-receipt fa-fw"></i> &nbsp; Imprimir ticket</button>
+			
+			<button type="button" class="button is-link is-light is-medium" onclick="print_ticket(\''.APP_URL.'app/pdf/reporte_venta.php?code='.$datos_venta['venta_codigo'].'\')" title="Generar PDF. '.$datos_venta['venta_id'].'" ><i class="fas fa-receipt fa-fw"></i> &nbsp; Generar reporte en PDF</button>
+			';
 			?>
 		</p>
 	</div>

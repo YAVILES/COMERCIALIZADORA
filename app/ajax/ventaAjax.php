@@ -25,6 +25,11 @@
 			echo $insVenta->removerProductoCarritoControlador();
 		}
 
+		/*--------- Remover todosproducto de carrito ---------*/
+		if($_POST['modulo_venta']=="remover_todo"){
+			echo $insVenta->removerCarritoControlador();
+		}
+
 		/*--------- Actualizar producto de carrito ---------*/
 		if($_POST['modulo_venta']=="actualizar_producto"){
 			echo $insVenta->actualizarProductoCarritoControlador();
@@ -59,6 +64,11 @@
 			echo $insVenta->eliminarVentaControlador();
 		}
 		
+		/*--------- Anular venta ---------*/
+		if($_POST['modulo_venta']=="anular_venta"){
+			echo $insVenta->anularVentaControlador();
+		}
+
 	}else{
 		session_destroy();
 		header("Location: ".APP_URL."login/");

@@ -214,6 +214,30 @@
             return json_encode($alerta);
         }
 
+		/*---------- Controlador remover todos los productos de la venta ----------*/
+		public function removerCarritoControlador(){
+
+			unset($_SESSION['datos_producto_venta']);
+
+			if(empty($_SESSION['datos_producto_venta'])){
+				$alerta=[
+					"tipo"=>"recargar",
+					"titulo"=>"¡Productos removidos!",
+					"texto"=>"Los productos se han removido de la venta",
+					"icono"=>"success"
+				];
+				
+			}else{
+				$alerta=[
+					"tipo"=>"simple",
+					"titulo"=>"Ocurrió un error inesperado",
+					"texto"=>"No hemos podido remover los productos, por favor intente nuevamente",
+					"icono"=>"error"
+				];
+			}
+			return json_encode($alerta);
+		}
+	
 
         /*---------- Controlador actualizar producto de venta ----------*/
         public function actualizarProductoCarritoControlador(){
@@ -940,7 +964,7 @@
 			$pagina = (isset($pagina) && $pagina>0) ? (int) $pagina : 1;
 			$inicio = ($pagina>0) ? (($pagina * $registros)-$registros) : 0;
 
-			$campos_tablas="venta.venta_id,venta.venta_codigo,venta.venta_fecha,venta.venta_hora,venta.venta_total,venta.usuario_id,venta.cliente_id,venta.caja_id,usuario.usuario_id,usuario.usuario_nombre,usuario.usuario_apellido,cliente.cliente_id,cliente.cliente_nombre,cliente.cliente_apellido,venta.venta_forma_pago";
+			$campos_tablas="venta.venta_id,venta.venta_codigo,venta.venta_fecha,venta.venta_hora,venta.venta_total,venta.usuario_id,venta.cliente_id,venta.caja_id,usuario.usuario_id,usuario.usuario_nombre,usuario.usuario_apellido,cliente.cliente_id,cliente.cliente_nombre,cliente.cliente_apellido,venta.venta_forma_pago,venta.anulado";
 
 			if(isset($busqueda) && $busqueda!=""){
 
@@ -975,6 +999,7 @@
 		                    <th class="has-text-centered">Cliente</th>
 		                    <th class="has-text-centered">Vendedor</th>
 		                    <th class="has-text-centered">Total</th>
+							<th class="has-text-centered">Anulado</th>
 		                    <th class="has-text-centered">Opciones</th>
 		                </tr>
 		            </thead>
@@ -985,6 +1010,18 @@
 				$contador=$inicio+1;
 				$pag_inicio=$inicio+1;
 				foreach($datos as $rows){
+					if($rows["anulado"] == 0){
+						$anular = '
+							<button type="button" class="button is-danger is-rounded is-small" onclick="anularVenta('.$rows['venta_id'].', \''.APP_URL.'\')">
+								Anular
+							</button>
+						';
+						$anulado = "NO";
+					}else{
+						$anular = '';
+						$anulado = "SI";
+					}
+					
 					$tabla.='
 						<tr class="has-text-centered" >
 							<td>'.$rows['venta_id'].'</td>
@@ -993,7 +1030,8 @@
 							<td>'.$this->limitarCadena($rows['cliente_nombre'].' '.$rows['cliente_apellido'],30,"...").'</td>
 							<td>'.$this->limitarCadena($rows['usuario_nombre'].' '.$rows['usuario_apellido'],30,"...").'</td>
 							<td>'.MONEDA_SIMBOLO.number_format($rows['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR).' '.$rows['venta_forma_pago'].'</td>
-			                <td>
+			                <td>'.$anulado.'</td>
+							<td>
 
 			                	<button type="button" class="button is-link is-outlined is-rounded is-small btn-sale-options" onclick="print_invoice(\''.APP_URL.'app/pdf/invoice.php?code='.$rows['venta_codigo'].'\')" title="Imprimir factura Nro. '.$rows['venta_id'].'" >
 	                                <i class="fas fa-file-invoice-dollar fa-fw"></i>
@@ -1002,11 +1040,12 @@
                                 <button type="button" class="button is-link is-outlined is-rounded is-small btn-sale-options" onclick="print_ticket(\''.APP_URL.'app/pdf/ticket.php?code='.$rows['venta_codigo'].'\')" title="Imprimir ticket Nro. '.$rows['venta_id'].'" >
                                     <i class="fas fa-receipt fa-fw"></i>
                                 </button>
-
+								
 			                    <a href="'.APP_URL.'saleDetail/'.$rows['venta_codigo'].'/" class="button is-link is-rounded is-small" title="Informacion de venta Nro. '.$rows['venta_id'].'" >
 			                    	<i class="fas fa-shopping-bag fa-fw"></i>
 			                    </a>
 
+								'.$anular.'
 			                </td>
 						</tr>
 					';
@@ -1112,5 +1151,39 @@
 
 		    return json_encode($alerta);
 		}
+
+			/*----------  Controlador eliminar venta  ----------*/
+		public function anularVentaControlador(){
+
+			$id=$this->limpiarCadena($_POST['venta_id']);
+
+			# Verificando venta #
+		    $datos=$this->ejecutarConsulta("SELECT * FROM venta WHERE venta_id='$id'");
+		    if($datos->rowCount()<=0){
+		        $alerta=[
+					"tipo"=>"simple",
+					"titulo"=>"Ocurrió un error inesperado",
+					"texto"=>"No hemos encontrado la venta en el sistema",
+					"icono"=>"error"
+				];
+				return json_encode($alerta);
+		        exit();
+		    }else{
+		    	$datos=$datos->fetch();
+		    }
+
+
+		    $eliminarVenta=$this->anularRegistro("venta","venta_id",$id);
+			$alerta=[
+				"tipo"=>"recargar",
+				"titulo"=>"Venta ".$_POST['venta_id']." anulada",
+				"texto"=>"La venta ha sido eliminada del sistema correctamente",
+				"icono"=>"success"
+			];
+
+		    return json_encode($alerta);
+		}
+
+
 
 	}

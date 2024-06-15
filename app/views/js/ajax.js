@@ -116,3 +116,43 @@ btn_exit.forEach(exitSystem => {
 
     });
 });
+
+
+function anularVenta(nro, app_url){
+    Swal.fire({
+        title: '¿Estás seguro de que deseas anular la venta' + nro + ', esta operacion es irreversible?',
+        text: "Quieres realizar la acción solicitada",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Si, anular',
+        cancelButtonText: 'No, cancelar'
+    }).then((result) => {
+        if (result.isConfirmed){
+
+            let data = new FormData();
+            data.append("modulo_venta", "anular_venta");
+            data.append("venta_id", nro);
+            
+            let method= 'POST';
+            let action= app_url+'app/ajax/ventaAjax.php';
+
+            let encabezados= new Headers();
+
+            let config={
+                method: method,
+                headers: encabezados,
+                mode: 'cors',
+                cache: 'no-cache',
+                body: data
+            };
+
+            fetch(action,config)
+            .then(respuesta => respuesta.json())
+            .then(respuesta =>{ 
+                return alertas_ajax(respuesta);
+            });
+        }
+    });
+}	

@@ -150,7 +150,14 @@
                             <td class="has-text-weight-bold">
                                 <?php echo MONEDA_SIMBOLO.number_format($_SESSION['venta_total'],MONEDA_DECIMALES,MONEDA_SEPARADOR_DECIMAL,MONEDA_SEPARADOR_MILLAR)." ".$_SESSION['venta_forma_pago']; ?>
                             </td>
-                            <td colspan="2"></td>
+                            <td colspan="2">
+                                <form class="FormularioAjax" action="<?php echo APP_URL; ?>app/ajax/ventaAjax.php" method="POST" autocomplete="off">
+                                    <input type="hidden" name="modulo_venta" value="remover_todo">
+                                    <button type="submit" class="button is-danger is-rounded is-small" title="Remover todo">
+                                        Remover Todo
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                         <?php
                             }else{
@@ -590,7 +597,7 @@
         });
     }
 
-        function cambiarForma(){
+    function cambiarForma(){
 
         Swal.fire({
             title: '¿Quieres cambiar la Forma de Pago?',

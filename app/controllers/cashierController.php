@@ -197,14 +197,15 @@
 				foreach($datos as $rows){
 					$estatus= $rows['estatus'];
 					if ($estatus==1) {
-							$boton='<button type="submit" class="button is-danger is-rounded is-small">
+						$boton='<button type="submit" class="button is-danger is-rounded is-small">
 			                    		Desactivar
 			                    	</button>';
 					}else{
-					$boton='<button type="submit" class="button is-success is-rounded is-small">
+						$boton='<button type="submit" class="button is-success is-rounded is-small">
 			                    		Activar
 			                    	</button>';
-			                    }
+			        }
+					
 					$tabla.='
 						<tr class="has-text-centered" >
 							<td>'.$rows['caja_numero'].'</td>

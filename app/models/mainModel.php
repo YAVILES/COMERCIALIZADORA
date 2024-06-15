@@ -154,6 +154,15 @@
             return $sql;
         }
 
+		/*---------- Funcion anular registro ----------*/
+		protected function anularRegistro($tabla,$campo,$id){
+			$sql=$this->conectar()->prepare("UPDATE $tabla SET anulado = 1 WHERE $campo=:id");
+			$sql->bindParam(":id",$id);
+			$sql->execute();
+			
+			return $sql;
+		}
+		
 
 		/*---------- Paginador de tablas ----------*/
 		protected function paginadorTablas($pagina,$numeroPaginas,$url,$botones){
